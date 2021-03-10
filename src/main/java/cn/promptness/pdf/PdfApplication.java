@@ -1,90 +1,66 @@
 package cn.promptness.pdf;
 
-import com.idrsolutions.image.png.PngEncoder;
-import net.coobird.thumbnailator.Thumbnails;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageTree;
-import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import cn.promptness.pdf.data.Constant;
+import cn.promptness.pdf.util.SpringFxmlLoader;
+import cn.promptness.pdf.util.SystemTrayUtil;
+import com.sun.glass.ui.CommonDialogs;
+import javafx.application.Application;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.springframework.boot.Banner;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
+import java.awt.*;
 import java.io.File;
 
-public class PdfApplication {
+@SpringBootApplication
+public class PdfApplication extends Application {
 
 
-    public static void main(String[] args) throws Exception {
+    private ConfigurableApplicationContext applicationContext;
 
-        readPDF("C:\\Users\\lynnlin\\Documents\\2021.01.21湖北宜昌温德姆至尊酒店概念意向方案.pdf", "D:/dddd.pdf");
+    public static void main(String[] args) {
+        System.setProperty("java.awt.headless", "false");
+        if (!SystemTray.isSupported()) {
+            System.exit(1);
+        }
+        Application.launch(PdfApplication.class, args);
+    }
 
-
+    @Override
+    public void init() {
+        applicationContext = new SpringApplicationBuilder().sources(PdfApplication.class).bannerMode(Banner.Mode.OFF).web(WebApplicationType.NONE).run(getParameters().getRaw().toArray(new String[0]));
     }
 
 
-    /**
-     * 压缩PDF文件
-     *
-     * @param source
-     * @param out
-     * @throws Exception
-     */
-    public static void readPDF(String source, String out) throws Exception {
+    @Override
+    public void start(Stage primaryStage) {
+        Parent root = applicationContext.getBean(SpringFxmlLoader.class).load("/fxml/main.fxml");
+        Scene scene = new Scene(root);
+        scene.setFill(Color.TRANSPARENT);
 
-        PDDocument document = PDDocument.load(new File(source));
-        PDPageTree pdPageTree = document.getDocumentCatalog().getPages();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
+                new FileChooser.ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac"),
+                new FileChooser.ExtensionFilter("All Files", "*.*"));
+        File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
-        if (pdPageTree.getCount() <= 0) {
-            return;
-        }
 
-        for (PDPage pdPage : pdPageTree) {
-            PDResources resources = pdPage.getResources();
-            resources.getXObjectNames();
-            for (COSName xObjectName : resources.getXObjectNames()) {
-                if (!resources.isImageXObject(xObjectName)) {
-                    continue;
-                }
-                PDImageXObject pdImageObject = (PDImageXObject) resources.getXObject(xObjectName);
-                BufferedImage bufferedImage = pdImageObject.getImage();
-                // 小于512K的不压缩
-                if (bufferedImage.getData().getDataBuffer().getSize() < 1024 * 512) {
-                    continue;
-                }
-                // 先转成PNG设置alpha通道
-                BufferedImage newBufferedImage = Thumbnails.of(bufferedImage).imageType(BufferedImage.TYPE_INT_ARGB).scale(1F).outputQuality(1F).outputFormat("PNG").asBufferedImage();
-
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                // 检测是否包含透明像素点
-                if (isTransparent(newBufferedImage)) {
-                    PngEncoder pngEncoder = new PngEncoder();
-                    pngEncoder.setCompressed(true);
-                    pngEncoder.write(newBufferedImage, outputStream);
-                } else {
-                    Thumbnails.of(newBufferedImage).scale(1F).outputQuality(0.25F).outputFormat("JPG").toOutputStream(outputStream);
-                }
-                // 替换图片
-                PDImageXObject fromByteArray = PDImageXObject.createFromByteArray(document, outputStream.toByteArray(), xObjectName.getName());
-                resources.put(xObjectName, fromByteArray);
-            }
-        }
-        document.save(out);
+        primaryStage.setTitle(Constant.TITLE + " - Powered By Lynn");
+        primaryStage.getIcons().add(new Image("/icon.png"));
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
+        primaryStage.show();
+        SystemTrayUtil.getInstance(primaryStage);
     }
-
-    public static boolean isTransparent(BufferedImage bufImg) {
-        int height = bufImg.getHeight();
-        int width = bufImg.getWidth();
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                int pixel = bufImg.getRGB(i, j);
-                if (pixel >> 24 == 0x00) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 }
