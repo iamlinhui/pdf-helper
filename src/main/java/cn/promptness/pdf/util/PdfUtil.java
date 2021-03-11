@@ -1,5 +1,7 @@
 package cn.promptness.pdf.util;
 
+
+import cn.promptness.pdf.image.png.PngEncoderSimple;
 import com.pngencoder.PngEncoder;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.pdfbox.cos.COSName;
@@ -23,7 +25,7 @@ public class PdfUtil {
      * @param out
      * @throws Exception
      */
-    public static void compress(String source, String out) throws Exception {
+    public static void compress(String source, String out, boolean pngSimple) throws Exception {
 
         PDDocument document = PDDocument.load(new File(source));
         PDPageTree pdPageTree = document.getDocumentCatalog().getPages();
@@ -51,8 +53,12 @@ public class PdfUtil {
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 // 检测是否包含透明像素点
                 if (isTransparent(newBufferedImage)) {
-                    // CompressionLevel : 0 - 9 数字越大压缩越小
-                    new PngEncoder().withBufferedImage(bufferedImage).withCompressionLevel(9).toStream(outputStream);
+                    if (pngSimple) {
+                        new PngEncoderSimple().setCompressed(true).write(bufferedImage, outputStream);
+                    } else {
+                        // CompressionLevel : 0 - 9 数字越大压缩越小
+                        new PngEncoder().withBufferedImage(bufferedImage).withCompressionLevel(9).toStream(outputStream);
+                    }
                 } else {
                     // Quality 0 - 1 数字越小压缩越小
                     Thumbnails.of(bufferedImage).scale(1F).outputQuality(0.1F).outputFormat("JPG").toOutputStream(outputStream);
