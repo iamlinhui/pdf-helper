@@ -12,6 +12,16 @@ import java.util.TimerTask;
 public class TooltipUtil {
 
     public static void show(String message) {
+        Tooltip tooltip = showBase(message);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(tooltip::hide);
+            }
+        }, 2000);
+    }
+
+    public static Tooltip showBase(String message) {
         Stage primaryStage = SystemTrayUtil.getPrimaryStage();
         Parent root = primaryStage.getScene().getRoot();
         double x = getScreenX(root) + getWidth(root) / 2;
@@ -21,12 +31,7 @@ public class TooltipUtil {
         tooltip.setOpacity(0.9d);
         tooltip.setWrapText(true);
         tooltip.show(primaryStage, x, y);
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(tooltip::hide);
-            }
-        }, 2000);
+        return tooltip;
     }
 
     public static double getScreenX(Node control) {

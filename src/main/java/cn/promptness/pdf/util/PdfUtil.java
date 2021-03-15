@@ -10,12 +10,19 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class PdfUtil {
+
+    private final static Logger logger = LoggerFactory.getLogger(PdfUtil.class);
 
 
     /**
@@ -25,16 +32,20 @@ public class PdfUtil {
      * @param out
      * @throws Exception
      */
-    public static void compress(String source, String out, boolean pngSimple) throws Exception {
+    public static void compress(File source, File out, boolean pngSimple, BigDecimal rate) throws Exception {
 
-        PDDocument document = PDDocument.load(new File(source));
+        logger.info("{}", rate);
+
+        PDDocument document = PDDocument.load(source);
         PDPageTree pdPageTree = document.getDocumentCatalog().getPages();
-
-        if (pdPageTree.getCount() <= 0) {
+        int count = pdPageTree.getCount();
+        if (count <= 0) {
             return;
         }
 
+        int index = 0;
         for (PDPage pdPage : pdPageTree) {
+            logger.info("第{}页", ++index);
             PDResources resources = pdPage.getResources();
             resources.getXObjectNames();
             for (COSName xObjectName : resources.getXObjectNames()) {
@@ -57,11 +68,13 @@ public class PdfUtil {
                         new PngEncoderSimple().setCompressed(true).write(bufferedImage, outputStream);
                     } else {
                         // CompressionLevel : 0 - 9 数字越大压缩越小
-                        new PngEncoder().withBufferedImage(bufferedImage).withCompressionLevel(9).toStream(outputStream);
+                        int level = new BigDecimal("9").multiply(rate).intValue();
+                        new PngEncoder().withBufferedImage(bufferedImage).withCompressionLevel(level).toStream(outputStream);
                     }
                 } else {
                     // Quality 0 - 1 数字越小压缩越小
-                    Thumbnails.of(bufferedImage).scale(1F).outputQuality(0.1F).outputFormat("JPG").toOutputStream(outputStream);
+                    double quality = BigDecimal.ONE.subtract(rate).setScale(2, RoundingMode.HALF_UP).doubleValue();
+                    Thumbnails.of(bufferedImage).scale(1F).outputQuality(quality).outputFormat("JPG").toOutputStream(outputStream);
                 }
                 // 替换图片
                 PDImageXObject fromByteArray = PDImageXObject.createFromByteArray(document, outputStream.toByteArray(), xObjectName.getName());
@@ -69,6 +82,39 @@ public class PdfUtil {
             }
         }
         document.save(out);
+    }
+
+
+    /**
+     * 导出PDF中的图片
+     *
+     * @author lynn
+     * @date 2021/3/15 14:19
+     * @since v1.0.0
+     */
+    public static void images(String source, String out) throws Exception {
+
+        PDDocument document = PDDocument.load(new File(source));
+        PDPageTree pdPageTree = document.getDocumentCatalog().getPages();
+        int count = pdPageTree.getCount();
+        if (count <= 0) {
+            return;
+        }
+        int index = 0;
+        int page = 0;
+        for (PDPage pdPage : pdPageTree) {
+            logger.info("第{}页", ++page);
+            PDResources resources = pdPage.getResources();
+            resources.getXObjectNames();
+            for (COSName xObjectName : resources.getXObjectNames()) {
+                if (!resources.isImageXObject(xObjectName)) {
+                    continue;
+                }
+                PDImageXObject pdImageObject = (PDImageXObject) resources.getXObject(xObjectName);
+                BufferedImage bufferedImage = pdImageObject.getImage();
+                ImageIO.write(bufferedImage, "PNG", new File(String.format("%s/%s.png", out, index++)));
+            }
+        }
     }
 
     public static boolean isTransparent(BufferedImage bufImg) {

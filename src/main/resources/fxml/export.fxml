@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<Tab closable="false" text="导出图片" xmlns="http://javafx.com/javafx"
+     xmlns:fx="http://javafx.com/fxml"
+     fx:controller="cn.promptness.pdf.controller.ExportController">
+    <GridPane hgap="10" vgap="10">
+        <padding>
+            <Insets top="10" right="50" bottom="20" left="10"/>
+        </padding>
+        <Button onAction="#fileChooser" text="选择文件" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Text fx:id="sourcePath" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Button onAction="#directoryChooser" text="导出目录" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Text fx:id="outPath" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Button fx:id="button" disable="true" onAction="#export" text="导出图片" GridPane.columnIndex="0"
+                GridPane.rowIndex="2"/>
+
+    </GridPane>
+</Tab>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<Tab fx:controller="cn.promptness.pdf.controller.CompressController" closable="false" text="压缩文件"
+     xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+    <GridPane hgap="10" vgap="10">
+        <padding>
+            <Insets top="10" right="50" bottom="20" left="10"/>
+        </padding>
+        <Button onAction="#fileChooser" text="选择文件" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Text fx:id="sourcePath" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Button onAction="#directoryChooser" text="导出目录" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Text fx:id="outPath" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="压缩比率" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <Slider fx:id="slider" onMouseClicked="#showTooltip" showTickLabels="true" showTickMarks="true" value="75"
+                GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Button onAction="#compress" fx:id="button" disable="true" text="开始压缩" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+    </GridPane>
+</Tab>

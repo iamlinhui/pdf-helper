@@ -46,7 +46,7 @@ public class SystemTrayUtil {
         exitItem = new MenuItem("退出");
 
         //设置悬停提示信息
-        Image trayIconImage = Toolkit.getDefaultToolkit().getImage(SystemTrayUtil.class.getResource("/icon.png"));
+        Image trayIconImage = Toolkit.getDefaultToolkit().getImage(SystemTrayUtil.class.getResource("/logo.png"));
         int trayIconWidth = new TrayIcon(trayIconImage).getSize().width;
         trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH));
 
