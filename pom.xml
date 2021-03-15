@@ -9,9 +9,9 @@
         <version>2.2.4.RELEASE</version>
         <relativePath/>
     </parent>
-    <groupId>org.example</groupId>
+    <groupId>cn.promptness</groupId>
     <artifactId>pdf-helper</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
 
     <properties>
