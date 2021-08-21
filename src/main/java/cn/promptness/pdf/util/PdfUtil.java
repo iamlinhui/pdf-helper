@@ -81,6 +81,8 @@ public class PdfUtil {
                 resources.put(xObjectName, fromByteArray);
             }
         }
+        // PDF contains an encryption dictionary, please remove it with setAllSecurityToBeRemoved()
+        document.setAllSecurityToBeRemoved(true);
         document.save(out);
     }
 
