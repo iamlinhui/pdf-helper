@@ -64,6 +64,7 @@ public class CompressService extends Task<Void> {
             PdfUtil.compress(new File(absoluteSourcePath), new File(outPath), true, rate);
             Desktop.getDesktop().open(new File(out));
         } catch (Exception e) {
+            logger.error(e.getMessage());
             TooltipUtil.show(e.getMessage());
         }
         return null;
