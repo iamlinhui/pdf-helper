@@ -5,13 +5,13 @@
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Lynn"
 #define MyAppURL "https://www.promptness.cn/"
-#define MyAppExeName "Meeting Tool.exe"
+#define MyAppExeName "PDF Tool.exe"
 #define MySourcePath "out\artifacts\Meeting_Tool\bundles\Meeting Tool\"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{AD7E402F-409E-4736-AB3A-A1C8B2247312}
+AppId={{B090464F-7B99-4217-A7E1-C0B5C8C9E04D}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
@@ -24,9 +24,9 @@ DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 OutputDir=D:\
-OutputBaseFilename=Meeting Tool Setup {#MyAppVersion}
-SetupIconFile={#MySourcePath}\Meeting Tool.ico
-UninstallDisplayIcon={app}\Meeting Tool.ico
+OutputBaseFilename=PDF Tool Setup {#MyAppVersion}
+SetupIconFile={#MySourcePath}\favicon.ico
+UninstallDisplayIcon={app}\favicon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
