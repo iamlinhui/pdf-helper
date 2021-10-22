@@ -17,8 +17,7 @@
         <Text fx:id="outPath" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
         <Label text="压缩比率" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-        <Slider fx:id="slider" onMouseClicked="#showTooltip" showTickLabels="true" showTickMarks="true" value="75"
-                GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        <Slider fx:id="slider" showTickLabels="true" showTickMarks="true" value="75" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
         <Button onAction="#compress" fx:id="button" disable="true" text="开始压缩" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
     </GridPane>

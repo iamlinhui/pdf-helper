@@ -3,6 +3,7 @@ package cn.promptness.pdf.util;
 
 import cn.promptness.pdf.image.png.PngEncoderSimple;
 import com.pngencoder.PngEncoder;
+import javafx.application.Platform;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -45,7 +46,9 @@ public class PdfUtil {
 
         int index = 0;
         for (PDPage pdPage : pdPageTree) {
-            logger.info("第{}页", ++index);
+            final String processing = String.format("第%s页", ++index);
+            logger.info(processing);
+            Platform.runLater(() -> TooltipUtil.show(processing));
             PDResources resources = pdPage.getResources();
             resources.getXObjectNames();
             for (COSName xObjectName : resources.getXObjectNames()) {
@@ -105,7 +108,9 @@ public class PdfUtil {
         int index = 0;
         int page = 0;
         for (PDPage pdPage : pdPageTree) {
-            logger.info("第{}页", ++page);
+            final String processing = String.format("第%s页", ++page);
+            logger.info(processing);
+            Platform.runLater(() -> TooltipUtil.show(processing));
             PDResources resources = pdPage.getResources();
             resources.getXObjectNames();
             for (COSName xObjectName : resources.getXObjectNames()) {

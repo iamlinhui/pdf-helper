@@ -7,11 +7,16 @@ import javafx.scene.control.Button;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.io.File;
 
 public abstract class PdfController {
+
+    @Resource
+    public ConfigurableApplicationContext applicationContext;
 
     @FXML
     public Text sourcePath;
@@ -19,8 +24,6 @@ public abstract class PdfController {
     public Text outPath;
     @FXML
     public Button button;
-
-    public boolean isRunning;
 
     public void initialize() {
 
@@ -43,7 +46,7 @@ public abstract class PdfController {
         File selectedFile = fileChooser.showOpenDialog(SystemTrayUtil.getPrimaryStage());
 
         if (selectedFile == null || !selectedFile.isFile() || !selectedFile.exists()) {
-            TooltipUtil.show("选择的文件选择不合法");
+            TooltipUtil.show("选择的文件不对");
             return;
         }
         sourcePath.setText(selectedFile.getName());
@@ -58,18 +61,16 @@ public abstract class PdfController {
         File selectedDirectory = directoryChooser.showDialog(SystemTrayUtil.getPrimaryStage());
 
         if (selectedDirectory == null || !selectedDirectory.isDirectory() || !selectedDirectory.exists()) {
-            TooltipUtil.show("导出文件夹选择不合法");
+            TooltipUtil.show("导出文件夹设置不对");
             return;
         }
         outPath.setText(selectedDirectory.getAbsolutePath());
     }
 
     public void reset() {
-        if (!isRunning) {
-            sourcePath.setId("");
-            sourcePath.setText("");
-            outPath.setText("");
-            button.setDisable(true);
-        }
+        sourcePath.setId("");
+        sourcePath.setText("");
+        outPath.setText("");
+        button.setDisable(true);
     }
 }

@@ -16,10 +16,10 @@ public class ExportController extends PdfController {
 
     @FXML
     public void export() {
-        ExportService exportService = new ExportService();
+        ExportService exportService = applicationContext.getBean(ExportService.class);
         exportService.setSource(sourcePath.getId());
         exportService.setOut(outPath.getText());
-        ProgressStage.of(SystemTrayUtil.getPrimaryStage(), exportService, "PDF文件导出图片中...").show();
+        ProgressStage.of(SystemTrayUtil.getPrimaryStage(), exportService).show();
     }
 
 }
