@@ -5,8 +5,8 @@
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Lynn"
 #define MyAppURL "https://www.promptness.cn/"
-#define MyAppExeName "PDF Tool.exe"
-#define MySourcePath "out\artifacts\Meeting_Tool\bundles\Meeting Tool\"
+#define MyAppExeName "pdf-helper.exe"
+#define MySourcePath "out\artifacts\pdf_helper\bundles\pdf-helper\"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -25,8 +25,8 @@ DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 OutputDir=D:\
 OutputBaseFilename=PDF Tool Setup {#MyAppVersion}
-SetupIconFile={#MySourcePath}\favicon.ico
-UninstallDisplayIcon={app}\favicon.ico
+SetupIconFile={#MySourcePath}\pdf-helper.ico
+UninstallDisplayIcon={app}\pdf-helper.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

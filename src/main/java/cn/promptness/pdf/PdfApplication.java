@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import jfxtras.styles.jmetro.Style;
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -42,7 +43,7 @@ public class PdfApplication extends Application {
         Parent root = applicationContext.getBean(SpringFxmlLoader.class).load("/fxml/main.fxml");
         Scene scene = new Scene(root);
         scene.setFill(Color.TRANSPARENT);
-
+        scene.getStylesheets().add(Style.LIGHT.getStyleStylesheetURL());
         primaryStage.setTitle(Constant.TITLE);
         primaryStage.getIcons().add(new Image("/logo.png"));
         primaryStage.setScene(scene);
