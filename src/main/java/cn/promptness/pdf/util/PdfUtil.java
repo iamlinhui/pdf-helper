@@ -3,6 +3,7 @@ package cn.promptness.pdf.util;
 
 import cn.promptness.pdf.image.png.PngEncoderSimple;
 import com.pngencoder.PngEncoder;
+import javafx.util.Pair;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -17,12 +18,18 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class PdfUtil {
 
-    private final static Logger logger = LoggerFactory.getLogger(PdfUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(PdfUtil.class);
+    private static final Integer CORE_SIZE = Runtime.getRuntime().availableProcessors();
+    private static final ExecutorService TASK_THREAD_POOL = new ThreadPoolExecutor(CORE_SIZE * 2, CORE_SIZE * 3, 5L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(CORE_SIZE * 1000), new ThreadPoolExecutor.CallerRunsPolicy());
 
 
     /**
@@ -47,7 +54,7 @@ public class PdfUtil {
         for (PDPage pdPage : pdPageTree) {
             logger.info("第{}页", ++index);
             PDResources resources = pdPage.getResources();
-            resources.getXObjectNames();
+            List<Future<Pair<COSName, PDImageXObject>>> futureList = new LinkedList<>();
             for (COSName xObjectName : resources.getXObjectNames()) {
                 if (!resources.isImageXObject(xObjectName)) {
                     continue;
@@ -58,32 +65,39 @@ public class PdfUtil {
                 if (bufferedImage.getData().getDataBuffer().getSize() < 1024 * 512) {
                     continue;
                 }
-                // 先转成PNG设置alpha通道
-                BufferedImage newBufferedImage = Thumbnails.of(bufferedImage).imageType(BufferedImage.TYPE_INT_ARGB).scale(1F).outputQuality(1F).outputFormat("PNG").asBufferedImage();
-
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                // 检测是否包含透明像素点
-                if (isTransparent(newBufferedImage)) {
-                    if (pngSimple) {
-                        new PngEncoderSimple().setCompressed(true).write(bufferedImage, outputStream);
-                    } else {
-                        // CompressionLevel : 0 - 9 数字越大压缩越小
-                        int level = new BigDecimal("9").multiply(rate).intValue();
-                        new PngEncoder().withBufferedImage(bufferedImage).withCompressionLevel(level).toStream(outputStream);
-                    }
-                } else {
-                    // Quality 0 - 1 数字越小压缩越小
-                    double quality = BigDecimal.ONE.subtract(rate).setScale(2, RoundingMode.HALF_UP).doubleValue();
-                    Thumbnails.of(bufferedImage).scale(1F).outputQuality(quality).outputFormat("JPG").toOutputStream(outputStream);
-                }
+                futureList.add(TASK_THREAD_POOL.submit(() -> getPdImageXObject(pngSimple, rate, document, xObjectName, bufferedImage)));
+            }
+            for (Future<Pair<COSName, PDImageXObject>> pairFuture : futureList) {
+                pairFuture.get();
                 // 替换图片
-                PDImageXObject fromByteArray = PDImageXObject.createFromByteArray(document, outputStream.toByteArray(), xObjectName.getName());
-                resources.put(xObjectName, fromByteArray);
+                resources.put(pairFuture.get().getKey(), pairFuture.get().getValue());
             }
         }
         // PDF contains an encryption dictionary, please remove it with setAllSecurityToBeRemoved()
         document.setAllSecurityToBeRemoved(true);
         document.save(out);
+    }
+
+    private static Pair<COSName, PDImageXObject> getPdImageXObject(boolean pngSimple, BigDecimal rate, PDDocument document, COSName xObjectName, BufferedImage bufferedImage) throws IOException {
+        // 先转成PNG设置alpha通道
+        BufferedImage newBufferedImage = Thumbnails.of(bufferedImage).imageType(BufferedImage.TYPE_INT_ARGB).scale(1F).outputQuality(1F).outputFormat("PNG").asBufferedImage();
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        // 检测是否包含透明像素点
+        if (isTransparent(newBufferedImage)) {
+            if (pngSimple) {
+                new PngEncoderSimple().setCompressed(true).write(bufferedImage, outputStream);
+            } else {
+                // CompressionLevel : 0 - 9 数字越大压缩越小
+                int level = new BigDecimal("9").multiply(rate).intValue();
+                new PngEncoder().withBufferedImage(bufferedImage).withCompressionLevel(level).toStream(outputStream);
+            }
+        } else {
+            // Quality 0 - 1 数字越小压缩越小
+            double quality = BigDecimal.ONE.subtract(rate).setScale(2, RoundingMode.HALF_UP).doubleValue();
+            Thumbnails.of(bufferedImage).scale(1F).outputQuality(quality).outputFormat("JPG").toOutputStream(outputStream);
+        }
+        return new Pair<>(xObjectName, PDImageXObject.createFromByteArray(document, outputStream.toByteArray(), xObjectName.getName()));
     }
 
 
