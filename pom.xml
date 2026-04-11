@@ -11,15 +11,11 @@
     </parent>
     <groupId>cn.promptness</groupId>
     <artifactId>pdf-helper</artifactId>
-    <version>1.0.0</version>
-
-
+    <version>1.0.1</version>
     <properties>
         <java.version>8</java.version>
         <javafx.version>8</javafx.version>
     </properties>
-
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -67,8 +63,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-
     <build>
         <finalName>${project.name}-${project.version}</finalName>
         <plugins>
